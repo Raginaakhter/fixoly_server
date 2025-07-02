@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const cors = require('cors');
 const app = express();
@@ -31,6 +31,91 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+// newsection......................................................................................
+const serviceCollection = client.db("Mobile-Repair");
+    const userCollection = serviceCollection.collection("Services");
+
+
+// Get
+app.get('/Services',async(req,res)=>{
+  const cursor =  userCollection.find()
+  const result = await cursor.toArray();
+  res.send(result);
+})
+
+// Services data get
+
+// app.get('/Services/:id',async(req,res)=>{
+//   const id = req.params.id;
+//   const query = {_id: new ObjectId(id)}
+
+
+// const options = {
+//   projection:{service_id:1 ,title:1,price:1}
+// };
+
+
+//   const result = await serviceCollection.findOne(query,options);
+//   res.send(result);
+// })
+
+app.get('/services/:id', async (req, res) => {
+  const id = req.params.id;
+
+  if (!ObjectId.isValid(id)) {
+    return res.status(400).send({ error: "Invalid ID format" });
+  }
+
+  const query = { _id: new ObjectId(id) };
+  const result = await userCollection.findOne(query); // ✅ Use correct collection
+  if (!result) {
+    return res.status(404).send({ error: "Service not found" });
+  }
+
+  res.send(result);
+});
+
+
+
+
+    // newsection ............................................................................
+const database = client.db("usersDB");
+    const usersCollection = database.collection("users");
+
+
+// Get
+app.get('/users',async(req,res)=>{
+  const cursor =  usersCollection.find()
+  const result = await cursor.toArray();
+  res.send(result);
+})
+
+
+
+// post..........
+app.post('/users',async(req,res)=>{
+const user =req.body;
+console.log("new users",user);
+
+ const result = await usersCollection.insertOne(user);
+ res.send(result);
+})
+
+// Delete
+app.delete('/users/:id',async(req,res)=>{
+   const id = req.params.id;
+   console.log("please delete from database",id);
+   const query = {_id: new ObjectId ( id)}
+   const result =await usersCollection.deleteOne(query);
+   res.send(result);
+}
+ 
+)
+
+
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
