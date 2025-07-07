@@ -36,6 +36,8 @@ async function run() {
 const serviceCollection = client.db("Mobile-Repair");
     const userCollection = serviceCollection.collection("Services");
 
+    const bookingCollection = client.db("bookings").collection("bookingData");
+
 
 // Get
 app.get('/Services',async(req,res)=>{
@@ -60,7 +62,7 @@ app.get('/Services',async(req,res)=>{
 //   res.send(result);
 // })
 
-app.get('/services/:id', async (req, res) => {
+app.get('/Services/:id', async (req, res) => {
   const id = req.params.id;
 
   if (!ObjectId.isValid(id)) {
@@ -68,7 +70,7 @@ app.get('/services/:id', async (req, res) => {
   }
 
   const query = { _id: new ObjectId(id) };
-  const result = await userCollection.findOne(query); // ✅ Use correct collection
+  const result = await userCollection.findOne(query); 
   if (!result) {
     return res.status(404).send({ error: "Service not found" });
   }
@@ -113,7 +115,15 @@ app.delete('/users/:id',async(req,res)=>{
  
 )
 
+// Bookings.........
+app.post('/bookings',async(req,res)=>{
+  const booking = req.body;
+  console.log(booking);
+  const result = await bookingCollection.insertOne(booking);
+  res.send(result);
 
+
+})
 
 
     // Send a ping to confirm a successful connection
