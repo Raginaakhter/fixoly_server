@@ -2,11 +2,20 @@ const express = require('express');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const cors = require('cors');
+
+
+// JWT
+
+const jwt = require('jsonwebtoken');
+
 const app = express();
 const port = process.env.PORT || 5000;
 
 // middleware
-app.use(cors());
+app.use(cors( {
+  origin:['http://localhost:5173'],
+  credentials:true
+}));
 app.use(express.json());
 
 // MongoDB URI
@@ -27,6 +36,23 @@ async function run() {
     // Database & Collections
     const serviceCollection = client.db("Mobile-Repair");
     const userCollection = serviceCollection.collection("Services");
+
+// Auth related api
+
+app.post('/jwt',async(req,res)=>{
+  const user = req.body;
+  console.log(user);
+  const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{expiresIn:'1h'})
+  res
+  .cookie('token',token,{
+    httpOnly:true,
+    secure:false,
+    sameSite:'none'
+  })
+  .send({success:true});
+})
+
+
 
     const bookingCollection = client.db("bookings").collection("bookingData");
     const database = client.db("usersDB");
